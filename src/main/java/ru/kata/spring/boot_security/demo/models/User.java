@@ -4,19 +4,20 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
-import javax.validation.constraints.Size;
 import java.util.Collection;
 import java.util.Set;
-@Entity
-@Table(name = "users")
-public class User implements UserDetails {
 
+@Table(name = "users")
+@Entity
+public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+//    @Basic(optional = false)
     private Long id;
 
-    @Size(min=4, message = "не меньше 4 знаков")
     private String email;
+
+    private String username;
 
     private String password;
 
@@ -25,37 +26,28 @@ public class User implements UserDetails {
     private String lastName;
 
     private int age;
-    @Transient
-    private String confirm;
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany
+    @JoinTable(name = "users_roles",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> roles;
 
     public User() {
     }
-    public User(String email, String password) {
-        this.email = email;
+
+
+    public User(String username, String password) {
+        this.username = username;
         this.password = password;
     }
 
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return roles;
-    }
-    public void setEmail(String username) {
-        this.email = username;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    @Override
-    public String getUsername() {
-        return email;
-    }
 
     public String getEmail() {
         return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public String getFirstName() {
@@ -81,6 +73,23 @@ public class User implements UserDetails {
     public void setAge(int age) {
         this.age = age;
     }
+    @Override
+    public String getUsername() {
+        return username;
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return roles;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
 
     @Override
     public boolean isAccountNonExpired() {
@@ -97,17 +106,10 @@ public class User implements UserDetails {
         return true;
     }
 
+
     @Override
     public boolean isEnabled() {
         return true;
-    }
-
-    public String getConfirm() {
-        return confirm;
-    }
-
-    public void setConfirm(String confirm) {
-        this.confirm = confirm;
     }
 
     public void setPassword(String password) {
@@ -122,6 +124,7 @@ public class User implements UserDetails {
         this.id = id;
     }
 
+
     public Set<Role> getRoles() {
         return roles;
     }
@@ -129,4 +132,6 @@ public class User implements UserDetails {
     public void setRoles(Set<Role> roles) {
         this.roles = roles;
     }
+
 }
+

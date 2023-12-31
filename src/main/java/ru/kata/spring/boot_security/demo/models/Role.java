@@ -11,16 +11,11 @@ import java.util.Set;
 public class Role implements GrantedAuthority {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Basic(optional = false)
+//    @Basic(optional = false)
     private Long id;
     private String name;
-
     @Transient
-    @ManyToMany(mappedBy = "roles")
-    @JoinTable(name = "users_roles",
-            joinColumns = @JoinColumn(name = "role_id"),
-            inverseJoinColumns = @JoinColumn(name = "user_id"))
-
+    @ManyToMany
     private Set<User> users;
 
     public Role() {
@@ -51,6 +46,7 @@ public class Role implements GrantedAuthority {
 
         return name.split("_")[1];
     }
+
     public void setName(String name) {
         this.name = name;
     }
@@ -79,5 +75,4 @@ public class Role implements GrantedAuthority {
     public Set<Role> getSingleTon() {
         return Collections.singleton(new Role(name));
     }
-
 }

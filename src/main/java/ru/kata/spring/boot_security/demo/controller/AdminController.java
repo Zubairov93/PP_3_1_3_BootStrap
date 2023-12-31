@@ -40,6 +40,7 @@ public class AdminController {
         model.addAttribute("roles", roles);
         return "users";
     }
+
     @GetMapping("/new")
     public String newUser(Model model) {
         model.addAttribute("user", new User());

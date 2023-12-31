@@ -6,8 +6,10 @@ import ru.kata.spring.boot_security.demo.models.User;
 
 import java.util.List;
 
-
 public interface UserService {
+
+
+    void initUser ();
 
     User getUser(long id);
 
@@ -26,4 +28,6 @@ public interface UserService {
     boolean contains(String username);
 
     List<Role> getAllRoles();
+
+
 }

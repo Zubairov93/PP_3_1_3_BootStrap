@@ -1,8 +1,7 @@
 package ru.kata.spring.boot_security.demo.services;
 
+import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -15,12 +14,11 @@ import ru.kata.spring.boot_security.demo.repositories.UserRepository;
 import ru.kata.spring.boot_security.demo.models.Role;
 import ru.kata.spring.boot_security.demo.models.User;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class UserServiceImpl implements UserService, UserDetailsService {
+
 
     private final UserRepository userRepository;
 
@@ -28,12 +26,13 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
+
     @Autowired
-    public UserServiceImpl(UserRepository userRepository, RoleRepository roleRepository, BCryptPasswordEncoder bCryptPasswordEncoder) {
+    public UserServiceImpl(BCryptPasswordEncoder bCryptPasswordEncoder, UserRepository userRepository, RoleRepository roleRepository) {
+
+        this.bCryptPasswordEncoder = bCryptPasswordEncoder;
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
-        this.bCryptPasswordEncoder = bCryptPasswordEncoder;
-
     }
 
     @Transactional(readOnly = true)
@@ -45,9 +44,11 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Transactional
     @Override
     public boolean save(User user) {
-        if (!userRepository.findByEmail(user.getEmail()).isEmpty()) {
+        if (!userRepository.findByUsername(user.getUsername()).isEmpty()) {
             return false;
         }
+        Role role = roleRepository.findByName("ROLE_USER").get();
+        user.setRoles(Collections.singleton(role));
         user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
         userRepository.save(user);
         return true;
@@ -56,16 +57,11 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Transactional
     @Override
     public void update(User user) {
-        String pass = user.getPassword();
-        if (pass.isEmpty()) {
-            user.setPassword(userRepository.findById(user.getId()).get().getPassword());
-        } else {
-            user.setPassword(bCryptPasswordEncoder.encode(pass));
-        }
+        user.setRoles(userRepository.findById(user.getId()).get().getRoles());
         userRepository.save(user);
     }
 
-    @Transactional
+    @Transactional()
     @Override
     public void delete(long id) {
         userRepository.deleteById(id);
@@ -87,6 +83,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         }
     }
 
+    @Transactional
     @Override
     public void save(User user, Role role) {
         Role role1 = roleRepository.findByName(role.getName()).get();
@@ -97,7 +94,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Override
     public boolean contains(String username) {
-        return !userRepository.findByEmail(username).isEmpty();
+        return !userRepository.findByUsername(username).isEmpty();
     }
 
     @Override
@@ -105,16 +102,45 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         return roleRepository.findAll();
     }
 
-    @Transactional(readOnly = true, noRollbackFor = Exception.class, propagation = Propagation.REQUIRED)
+
+    @Transactional(propagation = Propagation.REQUIRED, readOnly = true, noRollbackFor = Exception.class)
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Optional<User> user = userRepository.findByEmail(username);
-        for (Role role : user.get().getRoles()) {
-            System.out.println(role.getName());
-        }
-        if (user.isEmpty()) {
+        Optional<User> userOptional = userRepository.findByUsername(username);
+
+        if (userOptional.isEmpty()) {
             throw new UsernameNotFoundException(username);
         }
-        return user.get();
+
+        User user = userOptional.get();
+        Hibernate.initialize(user.getRoles()); // Инициализация ролей
+
+        Set<Role> roles = user.getRoles();
+
+        if (roles == null) {
+            throw new UsernameNotFoundException("User has no roles: " + username);
+        }
+
+        for (Role role : roles) {
+            System.out.println(role.getName());
+        }
+
+        return user;
+    }
+
+    @Transactional
+    public void initUser() {
+        User user = new User();
+        user.setUsername("A1");
+        user.setPassword(bCryptPasswordEncoder.encode("6"));
+        Set<Role> roles = new HashSet<>();
+        roles.add(new Role(1l, "ROLE_ADMIN"));
+        roles.add(new Role(2l, "ROLE_USER"));
+        roleRepository.saveAll(roles);
+        user.setRoles(roles);
+
+
+        userRepository.save(user);
+
     }
 }
