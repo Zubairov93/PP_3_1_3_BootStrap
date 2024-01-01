@@ -130,17 +130,26 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Transactional
     public void initUser() {
+
+        Role adminRole = new Role("ROLE_ADMIN");
+        Role userRole = new Role("ROLE_USER");
+        save(adminRole);
+        save(userRole);
+
+        // Создайте пользователя с ролями
         User user = new User();
-        user.setUsername("A1");
+        user.setUsername("Admin");
         user.setPassword(bCryptPasswordEncoder.encode("6"));
+        user.setRoles(Set.of(adminRole));
+        User user1 = new User();
+        user1.setUsername("User");
+        user1.setPassword(bCryptPasswordEncoder.encode("5"));
+        user1.setRoles(Set.of(userRole));
         Set<Role> roles = new HashSet<>();
-        roles.add(new Role(1l, "ROLE_ADMIN"));
-        roles.add(new Role(2l, "ROLE_USER"));
-        roleRepository.saveAll(roles);
+        roles.add(adminRole);
+        roles.add(userRole);
         user.setRoles(roles);
-
-
         userRepository.save(user);
-
     }
+
 }
