@@ -59,6 +59,15 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     public void update(User user) {
         user.setRoles(userRepository.findById(user.getId()).get().getRoles());
         userRepository.save(user);
+        User usersPassword = userRepository.findById(user.getId()).orElse(null);
+        if (usersPassword != null) {
+            String currentPass = usersPassword.getPassword();
+            if(!bCryptPasswordEncoder.matches(user.getPassword(), currentPass)) {
+                usersPassword.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
+            }
+            usersPassword.setUsername(user.getUsername());
+            userRepository.save(usersPassword);
+        }
     }
 
     @Transactional()
@@ -138,18 +147,19 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
         // Создайте пользователя с ролями
         User user = new User();
-        user.setUsername("Admin");
-        user.setPassword(bCryptPasswordEncoder.encode("6"));
+        user.setUsername("admin");
+        user.setPassword(bCryptPasswordEncoder.encode("admin"));
         user.setRoles(Set.of(adminRole));
         User user1 = new User();
-        user1.setUsername("User");
-        user1.setPassword(bCryptPasswordEncoder.encode("5"));
+        user1.setUsername("user");
+        user1.setPassword(bCryptPasswordEncoder.encode("user"));
         user1.setRoles(Set.of(userRole));
         Set<Role> roles = new HashSet<>();
         roles.add(adminRole);
         roles.add(userRole);
         user.setRoles(roles);
         userRepository.save(user);
+        userRepository.save(user1);
     }
 
 }
