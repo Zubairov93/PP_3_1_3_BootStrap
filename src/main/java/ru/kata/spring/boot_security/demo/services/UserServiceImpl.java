@@ -59,15 +59,14 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     public void update(User user) {
         user.setRoles(userRepository.findById(user.getId()).get().getRoles());
         userRepository.save(user);
-        User usersPassword = userRepository.findById(user.getId()).orElse(null);
-        if (usersPassword != null) {
-            String currentPass = usersPassword.getPassword();
-            if(!bCryptPasswordEncoder.matches(user.getPassword(), currentPass)) {
-                usersPassword.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
-            }
-            usersPassword.setUsername(user.getUsername());
-            userRepository.save(usersPassword);
+        String pass = user.getPassword();
+        if (pass.isEmpty()){
+            user.setPassword(userRepository.findById(user.getId()).get().getPassword());
         }
+        else{
+            user.setPassword(bCryptPasswordEncoder.encode(pass));
+        }
+        userRepository.save(user);
     }
 
     @Transactional()
