@@ -111,6 +111,7 @@
                   <thead>
                   <tr>
                     <th scope="col">ID</th>
+                    <th scope="col">Username</th>
                     <th scope="col">First Name</th>
                     <th scope="col">Last Name</th>
                     <th scope="col">Age</th>
@@ -122,6 +123,7 @@
                   </thead>
                   <tr th:each="user : ${list}">
                     <td th:utext="${user.getId()}">Id</td>
+                    <td th:utext="${user.getUsername()}">Id</td>
                     <td th:utext="${user.getFirstName()}">Id</td>
                     <td th:utext="${user.getLastName()}">Id</td>
                     <td th:utext="${user.getAge()}">Id</td>
@@ -159,6 +161,12 @@
                                   <p class="form-label text-navb">Id </p>
                                   <input type="text" class="form-control"
                                          th:value="${user.getId()}" name="id" disabled/>
+                                </div>
+                                <p></p>
+                                <div class="col-md-7">
+                                  <p class="form-label text-navb">Username</p>
+                                  <input type="text" class="form-control"
+                                         th:value="${user.getUsername()}" name="username"/>
                                 </div>
                                 <p></p>
                                 <div class="col-md-7">
@@ -252,7 +260,14 @@
 
               <form align="center" th:method="POST" th:action="@{/admin}" th:object="${user1}">
                 <br>
+
                 <div class="row justify-content-md-center">
+                  <div class="col-md-4" align="center">
+                    <label for="username" class="form-label text-navb">Username </label>
+                    <input type="text" class="form-control" th:field="*{username}"
+                           id="username"/>
+                  </div>
+                  <p></p>
                   <div class="col-md-4" align="center">
                     <label for="firstName" class="form-label text-navb">First name </label>
                     <input type="text" class="form-control" th:field="*{firstName}"

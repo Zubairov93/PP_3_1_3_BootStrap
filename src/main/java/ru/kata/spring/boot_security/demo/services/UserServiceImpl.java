@@ -44,11 +44,9 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Transactional
     @Override
     public boolean save(User user) {
-        if (!userRepository.findByUsername(user.getUsername()).isEmpty()) {
-            return false;
-        }
-        Role role = roleRepository.findByName("ROLE_USER").get();
-        user.setRoles(Collections.singleton(role));
+
+//        Role role = roleRepository.findByName("ROLE_USER").get();
+//        user.setRoles(Collections.singleton(role));
         user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
         userRepository.save(user);
         return true;
@@ -57,8 +55,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Transactional
     @Override
     public void update(User user) {
-        user.setRoles(userRepository.findById(user.getId()).get().getRoles());
-        userRepository.save(user);
+
         String pass = user.getPassword();
         if (pass.isEmpty()){
             user.setPassword(userRepository.findById(user.getId()).get().getPassword());
@@ -147,9 +144,11 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         // Создайте пользователя с ролями
         User user = new User();
         user.setUsername("admin");
+        user.setEmail("admin@mail.ru");
         user.setPassword(bCryptPasswordEncoder.encode("admin"));
         user.setRoles(Set.of(adminRole));
         User user1 = new User();
+        user1.setEmail("user@mail.ru");
         user1.setUsername("user");
         user1.setPassword(bCryptPasswordEncoder.encode("user"));
         user1.setRoles(Set.of(userRole));

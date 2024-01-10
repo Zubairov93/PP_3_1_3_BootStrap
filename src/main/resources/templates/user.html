@@ -92,6 +92,7 @@
                             <thead>
                             <tr>
                                 <th scope="col">ID</th>
+                                <th scope="col">Username</th>
                                 <th scope="col">First Name</th>
                                 <th scope="col">Last Name</th>
                                 <th scope="col">Age</th>
@@ -101,6 +102,7 @@
                             </thead>
                             <tr>
                                 <td th:utext="${admin.getId()}">Id</td>
+                                <td th:utext="${admin.getUsername()}">UName</td>
                                 <td th:utext="${admin.getFirstName()}">FName</td>
                                 <td th:utext="${admin.getLastName()}">SName</td>
                                 <td th:utext="${admin.getAge()}">Age</td>
